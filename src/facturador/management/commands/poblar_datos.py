@@ -1,7 +1,7 @@
 from decimal import Decimal
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from facturacion.models import Emisor, Cliente, Producto, MovimientoInventario, PerfilUsuario
+from facturador.models import Emisor, Cliente, Producto, MovimientoInventario, PerfilUsuario
 
 
 class Command(BaseCommand):

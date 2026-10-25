@@ -41,7 +41,7 @@ def login_view(request):
         else:
             messages.error(request, "Usuario o contraseña incorrectos. Verifica tus credenciales.")
 
-    return render(request, 'facturacion/login.html')
+    return render(request, 'facturador/login.html')
 
 
 def logout_view(request):
@@ -82,7 +82,7 @@ def dashboard(request):
         'ultimos_movimientos': ultimos_movimientos,
         'emisor': Emisor.get_emisor(),
     }
-    return render(request, 'facturacion/dashboard.html', context)
+    return render(request, 'facturador/dashboard.html', context)
 
 
 # ==========================================
@@ -111,7 +111,7 @@ def producto_lista(request):
         'q': q,
         'filtro_stock': filtro_stock,
     }
-    return render(request, 'facturacion/producto_lista.html', context)
+    return render(request, 'facturador/producto_lista.html', context)
 
 
 @bodeguero_o_admin
@@ -135,7 +135,7 @@ def producto_crear(request):
     else:
         form = ProductoForm()
 
-    return render(request, 'facturacion/producto_form.html', {'form': form, 'titulo': 'Nuevo Producto'})
+    return render(request, 'facturador/producto_form.html', {'form': form, 'titulo': 'Nuevo Producto'})
 
 
 @bodeguero_o_admin
@@ -151,7 +151,7 @@ def producto_editar(request, pk):
     else:
         form = ProductoForm(instance=producto)
 
-    return render(request, 'facturacion/producto_form.html', {'form': form, 'titulo': 'Editar Producto', 'producto': producto})
+    return render(request, 'facturador/producto_form.html', {'form': form, 'titulo': 'Editar Producto', 'producto': producto})
 
 
 @bodeguero_o_admin
@@ -169,7 +169,7 @@ def producto_eliminar(request, pk):
             messages.success(request, f"Producto '{nombre}' eliminado correctamente.")
         return redirect('producto_lista')
 
-    return render(request, 'facturacion/confirmar_eliminar.html', {
+    return render(request, 'facturador/confirmar_eliminar.html', {
         'objeto': producto,
         'tipo': 'Producto',
         'cancelar_url': 'producto_lista'
@@ -220,7 +220,7 @@ def inventario_dashboard(request):
         'productos_alerta': productos_alerta,
         'prod_filter': prod_filter,
     }
-    return render(request, 'facturacion/inventario_dashboard.html', context)
+    return render(request, 'facturador/inventario_dashboard.html', context)
 
 
 # ==========================================
@@ -234,7 +234,7 @@ def cliente_lista(request):
     if q:
         clientes = clientes.filter(Q(nombres__icontains=q) | Q(identificacion__icontains=q))
 
-    return render(request, 'facturacion/cliente_lista.html', {'clientes': clientes, 'q': q})
+    return render(request, 'facturador/cliente_lista.html', {'clientes': clientes, 'q': q})
 
 
 @asesor_o_admin
@@ -249,7 +249,7 @@ def cliente_crear(request):
     else:
         form = ClienteForm()
 
-    return render(request, 'facturacion/cliente_form.html', {'form': form, 'titulo': 'Nuevo Cliente'})
+    return render(request, 'facturador/cliente_form.html', {'form': form, 'titulo': 'Nuevo Cliente'})
 
 
 @asesor_o_admin
@@ -265,7 +265,7 @@ def cliente_editar(request, pk):
     else:
         form = ClienteForm(instance=cliente)
 
-    return render(request, 'facturacion/cliente_form.html', {'form': form, 'titulo': 'Editar Cliente', 'cliente': cliente})
+    return render(request, 'facturador/cliente_form.html', {'form': form, 'titulo': 'Editar Cliente', 'cliente': cliente})
 
 
 # ==========================================
@@ -292,7 +292,7 @@ def factura_lista(request):
         'q': q,
         'estado': estado,
     }
-    return render(request, 'facturacion/factura_lista.html', context)
+    return render(request, 'facturador/factura_lista.html', context)
 
 
 @asesor_o_admin
@@ -362,7 +362,7 @@ def factura_crear(request):
         'siguiente_numero': emisor.obtener_siguiente_numero(),
         'formas_pago': Factura.FORMA_PAGO_CHOICES,
     }
-    return render(request, 'facturacion/factura_crear.html', context)
+    return render(request, 'facturador/factura_crear.html', context)
 
 
 @login_required
@@ -380,7 +380,7 @@ def factura_detalle(request, pk):
         'detalles': detalles,
         'emisor': emisor,
     }
-    return render(request, 'facturacion/factura_detalle.html', context)
+    return render(request, 'facturador/factura_detalle.html', context)
 
 
 @asesor_o_admin
@@ -403,7 +403,7 @@ def factura_anular(request, pk):
             messages.error(request, str(e))
         return redirect('factura_detalle', pk=factura.pk)
 
-    return render(request, 'facturacion/factura_anular_modal.html', {'factura': factura})
+    return render(request, 'facturador/factura_anular_modal.html', {'factura': factura})
 
 
 # ==========================================
@@ -422,7 +422,7 @@ def emisor_configuracion(request):
     else:
         form = EmisorForm(instance=emisor)
 
-    return render(request, 'facturacion/emisor_form.html', {'form': form, 'emisor': emisor})
+    return render(request, 'facturador/emisor_form.html', {'form': form, 'emisor': emisor})
 
 
 # ==========================================

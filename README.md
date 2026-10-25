@@ -28,9 +28,10 @@ Sistema web de facturación electrónica y gestión de inventario adaptado a la 
    - **Administrador**: Acceso total al sistema (Ventas, Inventario, Clientes, Configuración de Emisor SRI).
    - **Asesor Comercial**: Especializado en ventas (Emisión de facturas, clientes, consulta de catálogo y precios).
    - **Bodeguero**: Especializado en inventario (Alta/edición de productos, Kardex, compras y ajustes de stock).
-5. **Arquitectura MVC**:
-   - **Modelos (M)**: [facturacion/models.py](file:///Users/junior.mera@latam.com/Personal/facturador/facturacion/models.py) (`Emisor`, `Cliente`, `Producto`, `Factura`, `DetalleFactura`, `MovimientoInventario`, `PerfilUsuario`).
-   - **Controladores / Servicios (C)**: [facturacion/views.py](file:///Users/junior.mera@latam.com/Personal/facturador/facturacion/views.py) y [facturacion/services.py](file:///Users/junior.mera@latam.com/Personal/facturador/facturacion/services.py).
+5. **Arquitectura MVC con Layout `src/`**:
+   - **Modelos (M)**: [src/facturador/models.py](file:///Users/junior.mera@latam.com/Personal/facturador/src/facturador/models.py) (`Emisor`, `Cliente`, `Producto`, `Factura`, `DetalleFactura`, `MovimientoInventario`, `PerfilUsuario`).
+   - **Controladores / Servicios (C)**: [src/facturador/views.py](file:///Users/junior.mera@latam.com/Personal/facturador/src/facturador/views.py) y [src/facturador/services.py](file:///Users/junior.mera@latam.com/Personal/facturador/src/facturador/services.py).
+   - **Configuración**: [src/config/settings.py](file:///Users/junior.mera@latam.com/Personal/facturador/src/config/settings.py) y [src/config/urls.py](file:///Users/junior.mera@latam.com/Personal/facturador/src/config/urls.py).
    - **Vistas / Plantillas (V)**: `templates/` con **Bootstrap 5.3** y Bootstrap Icons.
 6. **Base de Datos**:
    - SQLite (`db.sqlite3`).
