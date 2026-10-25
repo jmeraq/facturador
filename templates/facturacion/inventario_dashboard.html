@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventario & Kardex | Facturador Ecuador{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h2 class="fw-bold mb-1">
+            <i class="bi bi-layers text-primary me-2"></i>Control de Inventario & Kardex
+        </h2>
+        <p class="text-muted mb-0">
+            Trazabilidad completa: el inventario se descuenta automáticamente al facturar y se repone al anular facturas.
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'producto_lista' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-box-seam me-1"></i> Ver Catálogo de Productos
+        </a>
+        <a href="{% url 'factura_crear' %}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-file-earmark-plus me-1"></i> Nueva Factura
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Formulario de Reabastecimiento o Ajuste Rápido -->
+    <div class="col-lg-5">
+        <div class="card h-100 shadow-sm border-primary-subtle">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="card-title fw-bold mb-0 text-primary">
+                    <i class="bi bi-plus-circle me-1"></i> Movimiento Manual de Inventario
+                </h5>
+                <small class="text-muted">Ingresa compras de proveedores o corrige stock físico.</small>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Seleccionar Producto <span class="text-danger">*</span></label>
+                        {{ form.producto }}
+                        {% if form.producto.errors %}
+                            <div class="text-danger small mt-1">{{ form.producto.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tipo de Operación <span class="text-danger">*</span></label>
+                        {{ form.tipo_operacion }}
+                        <div class="form-text small">
+                            <strong>Ingreso:</strong> suma unidades al stock actual.<br>
+                            <strong>Ajuste directo:</strong> fija el inventario al valor exacto ingresado.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Cantidad <span class="text-danger">*</span></label>
+                        {{ form.cantidad }}
+                        {% if form.cantidad.errors %}
+                            <div class="text-danger small mt-1">{{ form.cantidad.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Motivo / Justificación <span class="text-danger">*</span></label>
+                        {{ form.motivo }}
+                        {% if form.motivo.errors %}
+                            <div class="text-danger small mt-1">{{ form.motivo.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                        <i class="bi bi-check2-circle me-1"></i> Registrar Movimiento en Inventario
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen de Stock por Producto -->
+    <div class="col-lg-7">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title fw-bold mb-0">
+                        <i class="bi bi-boxes text-dark me-2"></i> Existencias Actuales en Bodega
+                    </h5>
+                    <small class="text-muted">Listado rápido de disponibilidad</small>
+                </div>
+                <a href="{% url 'producto_crear' %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus-lg"></i> Producto
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="sticky-top bg-light">
+                            <tr>
+                                <th>Código</th>
+                                <th>Producto</th>
+                                <th class="text-end">Stock Actual</th>
+                                <th class="text-end">Mínimo</th>
+                                <th class="text-center">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in productos %}
+                            <tr>
+                                <td><span class="badge bg-light text-dark border font-monospace">{{ p.codigo }}</span></td>
+                                <td>
+                                    <div class="fw-semibold">{{ p.nombre }}</div>
+                                    <small class="text-muted">${{ p.precio_unitario }} s/IVA</small>
+                                </td>
+                                <td class="text-end font-monospace fw-bold fs-6">
+                                    {{ p.stock|floatformat:0 }}
+                                </td>
+                                <td class="text-end font-monospace text-muted">
+                                    {{ p.stock_minimo|floatformat:0 }}
+                                </td>
+                                <td class="text-center">
+                                    {% if p.stock <= 0 %}
+                                        <span class="badge badge-stock-out">Agotado</span>
+                                    {% elif p.stock_bajo %}
+                                        <span class="badge badge-stock-low">Stock Bajo</span>
+                                    {% else %}
+                                        <span class="badge badge-stock-ok">Óptimo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    No hay productos dados de alta.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Historial / Kardex de Movimientos -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <h5 class="card-title fw-bold mb-0">
+                <i class="bi bi-journal-text text-primary me-2"></i> Historial de Movimientos de Inventario (Kardex)
+            </h5>
+            <small class="text-muted">Registro auditable de cada entrada, venta y ajuste</small>
+        </div>
+
+        <form method="get" class="d-flex align-items-center gap-2">
+            <select name="producto_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">-- Todos los Productos --</option>
+                {% for p in productos %}
+                    <option value="{{ p.id }}" {% if prod_filter == p.id|stringformat:"s" %}selected{% endif %}>
+                        {{ p.nombre }} ({{ p.codigo }})
+                    </option>
+                {% endfor %}
+            </select>
+            {% if prod_filter %}
+                <a href="{% url 'inventario_dashboard' %}" class="btn btn-sm btn-outline-secondary">Limpiar</a>
+            {% endif %}
+        </form>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 150px;">Fecha y Hora</th>
+                        <th>Producto</th>
+                        <th class="text-center">Tipo de Movimiento</th>
+                        <th class="text-end">Cant.</th>
+                        <th class="text-end">Stock Previo</th>
+                        <th class="text-end">Stock Resultante</th>
+                        <th>Motivo / Referencia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mov in movimientos %}
+                    <tr>
+                        <td class="small text-muted font-monospace">
+                            {{ mov.fecha|date:"d/m/Y H:i:s" }}
+                        </td>
+                        <td>
+                            <div class="fw-semibold">{{ mov.producto.nombre }}</div>
+                            <small class="text-muted font-monospace">{{ mov.producto.codigo }}</small>
+                        </td>
+                        <td class="text-center">
+                            {% if mov.tipo == 'EGRESO_VENTA' %}
+                                <span class="badge bg-danger-subtle text-danger px-2 py-1">
+                                    <i class="bi bi-cart-dash me-1"></i> Venta Facturada
+                                </span>
+                            {% elif mov.tipo == 'INGRESO' %}
+                                <span class="badge bg-success-subtle text-success px-2 py-1">
+                                    <i class="bi bi-plus-circle me-1"></i> Entrada / Compra
+                                </span>
+                            {% elif mov.tipo == 'DEVOLUCION_ANULACION' %}
+                                <span class="badge bg-warning-subtle text-warning px-2 py-1">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reposición (Anulación)
+                                </span>
+                            {% else %}
+                                <span class="badge bg-info-subtle text-info px-2 py-1">
+                                    <i class="bi bi-sliders me-1"></i> Ajuste Físico
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end font-monospace fw-bold {% if mov.tipo == 'EGRESO_VENTA' %}text-danger{% else %}text-success{% endif %}">
+                            {% if mov.tipo == 'EGRESO_VENTA' %}-{% else %}+{% endif %}{{ mov.cantidad|floatformat:0 }}
+                        </td>
+                        <td class="text-end font-monospace text-muted">
+                            {{ mov.stock_anterior|floatformat:0 }}
+                        </td>
+                        <td class="text-end font-monospace fw-bold text-dark">
+                            {{ mov.stock_nuevo|floatformat:0 }}
+                        </td>
+                        <td>
+                            <div>{{ mov.motivo }}</div>
+                            {% if mov.factura %}
+                                <small>
+                                    <a href="{% url 'factura_detalle' mov.factura.pk %}" class="text-primary text-decoration-none">
+                                        <i class="bi bi-link-45deg"></i> Factura {{ mov.factura.numero_factura }}
+                                    </a>
+                                </small>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-clock-history fs-2 d-block mb-2 text-secondary"></i>
+                            No hay movimientos registrados en el Kardex.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

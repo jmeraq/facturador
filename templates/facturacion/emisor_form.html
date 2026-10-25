@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Datos del Emisor | Facturador Ecuador{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex align-items-center mb-3">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm me-3">
+                <i class="bi bi-arrow-left"></i> Dashboard
+            </a>
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-gear-fill text-primary me-2"></i>Configuración de Datos del Emisor (SRI)
+            </h3>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <p class="text-muted small mb-4">
+                    Estos datos fiscales se imprimirán en el encabezado oficial de todas las facturas y comprobantes RIDE emitidos.
+                </p>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">RUC del Emisor (13 dígitos) <span class="text-danger">*</span></label>
+                            {{ form.ruc }}
+                            {% if form.ruc.errors %}
+                                <div class="text-danger small mt-1">{{ form.ruc.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Razón Social <span class="text-danger">*</span></label>
+                            {{ form.razon_social }}
+                            {% if form.razon_social.errors %}
+                                <div class="text-danger small mt-1">{{ form.razon_social.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Nombre Comercial</label>
+                            {{ form.nombre_comercial }}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Dirección Matriz <span class="text-danger">*</span></label>
+                            {{ form.direccion_matriz }}
+                        </div>
+
+                        <div class="col-12"><hr class="my-2"></div>
+
+                        <div class="col-12">
+                            <h6 class="fw-bold text-primary mb-2">
+                                <i class="bi bi-upc-scan me-1"></i> Puntos de Emisión y Secuenciales SRI
+                            </h6>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Establecimiento</label>
+                            {{ form.establecimiento }}
+                            <div class="form-text small">Código 3 dígitos (ej. 001)</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Punto de Emisión</label>
+                            {{ form.punto_emision }}
+                            <div class="form-text small">Código 3 dígitos (ej. 001)</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Secuencial Actual</label>
+                            {{ form.secuencial_actual }}
+                            <div class="form-text small">Próximo secuencial a facturar</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Tarifa de IVA (%) por defecto</label>
+                            {{ form.tarifa_iva_defecto }}
+                            <div class="form-text small">Tarifa general en Ecuador: 15.00%</div>
+                        </div>
+
+                        <div class="col-md-6 d-flex flex-column justify-content-center">
+                            <div class="form-check form-switch mb-2">
+                                {{ form.obligado_contabilidad }}
+                                <label class="form-check-label fw-semibold" for="{{ form.obligado_contabilidad.id_for_label }}">
+                                    Obligado a llevar contabilidad
+                                </label>
+                            </div>
+                            <div class="form-check form-switch">
+                                {{ form.es_contribuyente_rimpe }}
+                                <label class="form-check-label fw-semibold" for="{{ form.es_contribuyente_rimpe.id_for_label }}">
+                                    Contribuyente Régimen RIMPE
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="bi bi-check-lg me-1"></i> Guardar Configuración
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} | Facturador Ecuador{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex align-items-center mb-3">
+            <a href="{% url 'producto_lista' %}" class="btn btn-outline-secondary btn-sm me-3">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+            <h3 class="fw-bold mb-0">{{ titulo }}</h3>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Código / SKU <span class="text-danger">*</span></label>
+                            {{ form.codigo }}
+                            {% if form.codigo.errors %}
+                                <div class="text-danger small mt-1">{{ form.codigo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Nombre del Producto <span class="text-danger">*</span></label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="text-danger small mt-1">{{ form.nombre.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Descripción</label>
+                            {{ form.descripcion }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Precio Unitario (sin IVA) en USD <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.precio_unitario }}
+                            </div>
+                            {% if form.precio_unitario.errors %}
+                                <div class="text-danger small mt-1">{{ form.precio_unitario.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Tarifa de IVA (Ecuador) <span class="text-danger">*</span></label>
+                            {{ form.tarifa_iva }}
+                            <div class="form-text">En Ecuador la tarifa general vigente es 15%. Bienes básicos aplican 0%.</div>
+                        </div>
+
+                        <div class="col-12"><hr class="my-2"></div>
+
+                        <div class="col-12">
+                            <h6 class="fw-bold text-primary mb-2">
+                                <i class="bi bi-box-seam me-1"></i> Control de Existencias en Inventario
+                            </h6>
+                            <p class="text-muted small mb-3">
+                                Este stock se reducirá automáticamente cada vez que se emita una factura para este producto.
+                            </p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Stock Inicial / Actual <span class="text-danger">*</span></label>
+                            {{ form.stock }}
+                            <div class="form-text">Unidades disponibles en bodega/tienda.</div>
+                            {% if form.stock.errors %}
+                                <div class="text-danger small mt-1">{{ form.stock.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Stock Mínimo para Alerta</label>
+                            {{ form.stock_minimo }}
+                            <div class="form-text">Al llegar a esta cantidad o menos, el sistema emitirá aviso preventivo.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check form-switch mt-2">
+                                {{ form.activo }}
+                                <label class="form-check-label fw-semibold" for="{{ form.activo.id_for_label }}">
+                                    Producto disponible para la venta
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <a href="{% url 'producto_lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="bi bi-check-lg me-1"></i> Guardar Producto
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

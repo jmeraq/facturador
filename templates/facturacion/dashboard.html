@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | Facturador Ecuador{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-7">
+        <h2 class="fw-bold mb-1">Panel de Control</h2>
+        <p class="text-muted mb-0">
+            <i class="bi bi-building me-1"></i> {{ emisor.razon_social }} &bull; RUC: <strong>{{ emisor.ruc }}</strong> &bull; Establecimiento {{ emisor.establecimiento }}-{{ emisor.punto_emision }}
+        </p>
+    </div>
+    <div class="col-md-5 text-md-end mt-3 mt-md-0 d-flex gap-2 justify-content-md-end">
+        {% if request.user.perfil.es_asesor %}
+        <a href="{% url 'factura_crear' %}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-file-earmark-plus me-1"></i> Emitir Factura
+        </a>
+        {% endif %}
+        {% if request.user.perfil.es_bodeguero %}
+        <a href="{% url 'inventario_dashboard' %}" class="btn btn-outline-secondary shadow-sm">
+            <i class="bi bi-layers me-1"></i> Gestionar Inventario
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Tarjetas de Métricas -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card stat-success h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted text-uppercase fw-semibold small">Ventas Este Mes</span>
+                    <h3 class="fw-bold mb-0 text-success">${{ total_facturado_mes|floatformat:2 }}</h3>
+                    <small class="text-muted">{{ num_facturas_mes }} facturas emitidas</small>
+                </div>
+                <div class="stat-icon bg-success-subtle text-success">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted text-uppercase fw-semibold small">Próxima Factura</span>
+                    <h3 class="fw-bold mb-0 text-primary">{{ emisor.obtener_siguiente_numero }}</h3>
+                    <small class="text-muted">Secuencial #{{ emisor.secuencial_actual }}</small>
+                </div>
+                <div class="stat-icon bg-primary-subtle text-primary">
+                    <i class="bi bi-receipt-cutoff"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card stat-warning h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted text-uppercase fw-semibold small">Productos Activos</span>
+                    <h3 class="fw-bold mb-0 text-dark">{{ total_productos }}</h3>
+                    <small class="text-muted">En catálogo para facturación</small>
+                </div>
+                <div class="stat-icon bg-warning-subtle text-warning">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card {% if num_productos_bajo_stock > 0 %}stat-danger{% else %}stat-success{% endif %} h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted text-uppercase fw-semibold small">Alertas de Stock</span>
+                    <h3 class="fw-bold mb-0 {% if num_productos_bajo_stock > 0 %}text-danger{% else %}text-success{% endif %}">
+                        {{ num_productos_bajo_stock }}
+                    </h3>
+                    <small class="text-muted">
+                        {% if num_productos_bajo_stock > 0 %}Bajo stock mínimo{% else %}Inventario óptimo{% endif %}
+                    </small>
+                </div>
+                <div class="stat-icon {% if num_productos_bajo_stock > 0 %}bg-danger-subtle text-danger{% else %}bg-success-subtle text-success{% endif %}">
+                    <i class="bi bi-exclamation-octagon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alerta de productos bajo stock si existen -->
+{% if productos_alerta %}
+<div class="alert alert-warning border-warning-subtle d-flex align-items-center justify-content-between mb-4 shadow-sm" role="alert">
+    <div>
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5 text-warning"></i>
+        <strong>Atención:</strong> Tienes <strong>{{ productos_alerta|length }}</strong> producto(s) con stock igual o por debajo del mínimo requerido.
+        <span class="d-none d-md-inline text-muted ms-2">
+            ({% for p in productos_alerta %}{{ p.nombre }}: {{ p.stock|floatformat:0 }}{% if not forloop.last %}, {% endif %}{% endfor %})
+        </span>
+    </div>
+    {% if request.user.perfil.es_bodeguero %}
+    <a href="{% url 'inventario_dashboard' %}" class="btn btn-warning btn-sm fw-semibold text-dark">
+        <i class="bi bi-plus-circle me-1"></i> Reabastecer Inventario
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Tablas de Actividad Reciente -->
+<div class="row g-4">
+    <!-- Últimas Facturas -->
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="card-title fw-bold mb-0">
+                    <i class="bi bi-receipt text-primary me-2"></i> Últimas Facturas Emitidas
+                </h5>
+                <a href="{% url 'factura_lista' %}" class="btn btn-sm btn-outline-primary">Ver Todas</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nro. Factura</th>
+                                <th>Cliente</th>
+                                <th>Fecha</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-center">Estado</th>
+                                <th class="text-end">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fac in ultimas_facturas %}
+                            <tr>
+                                <td class="fw-semibold text-primary">
+                                    <a href="{% url 'factura_detalle' fac.pk %}" class="text-decoration-none">
+                                        {{ fac.numero_factura }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">{{ fac.cliente.nombres|truncatechars:24 }}</div>
+                                    <small class="text-muted">{{ fac.cliente.identificacion }}</small>
+                                </td>
+                                <td>
+                                    <small>{{ fac.fecha_emision|date:"d/m/Y H:i" }}</small>
+                                </td>
+                                <td class="text-end fw-bold">
+                                    ${{ fac.total|floatformat:2 }}
+                                </td>
+                                <td class="text-center">
+                                    {% if fac.estado == 'EMITIDA' %}
+                                        <span class="badge bg-success-subtle text-success">Emitida</span>
+                                    {% else %}
+                                        <span class="badge bg-danger-subtle text-danger">Anulada</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'factura_detalle' fac.pk %}" class="btn btn-sm btn-light border" title="Ver / Imprimir Factura">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    <i class="bi bi-receipt fs-3 d-block mb-2 text-secondary"></i>
+                                    Aún no has emitido ninguna factura.
+                                    <div class="mt-2">
+                                        <a href="{% url 'factura_crear' %}" class="btn btn-sm btn-primary">Emitir Primera Factura</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movimientos de Inventario (Kardex en vivo) -->
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="card-title fw-bold mb-0">
+                    <i class="bi bi-arrow-left-right text-info me-2"></i> Kardex de Inventario
+                </h5>
+                <a href="{% url 'inventario_dashboard' %}" class="btn btn-sm btn-outline-secondary">Ver Kardex</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Movimiento</th>
+                                <th class="text-end">Cant.</th>
+                                <th class="text-end">Stock Nuevo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mov in ultimos_movimientos %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ mov.producto.nombre|truncatechars:20 }}</div>
+                                    <small class="text-muted">{{ mov.fecha|date:"d/m H:i" }}</small>
+                                </td>
+                                <td>
+                                    {% if mov.tipo == 'EGRESO_VENTA' %}
+                                        <span class="badge bg-danger-subtle text-danger">
+                                            <i class="bi bi-dash-circle me-1"></i> Venta
+                                        </span>
+                                    {% elif mov.tipo == 'INGRESO' %}
+                                        <span class="badge bg-success-subtle text-success">
+                                            <i class="bi bi-plus-circle me-1"></i> Ingreso
+                                        </span>
+                                    {% elif mov.tipo == 'DEVOLUCION_ANULACION' %}
+                                        <span class="badge bg-warning-subtle text-warning">
+                                            <i class="bi bi-arrow-counterclockwise me-1"></i> Anulación
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-info-subtle text-info">
+                                            <i class="bi bi-sliders me-1"></i> Ajuste
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end fw-semibold {% if mov.tipo == 'EGRESO_VENTA' %}text-danger{% else %}text-success{% endif %}">
+                                    {% if mov.tipo == 'EGRESO_VENTA' %}-{% else %}+{% endif %}{{ mov.cantidad|floatformat:0 }}
+                                </td>
+                                <td class="text-end fw-bold">
+                                    {{ mov.stock_nuevo|floatformat:0 }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">
+                                    <i class="bi bi-box fs-3 d-block mb-2 text-secondary"></i>
+                                    No hay registros de inventario aún.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

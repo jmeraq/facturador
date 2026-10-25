@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+
+{% block title %}Factura {{ factura.numero_factura }} | RIDE Ecuador{% endblock %}
+
+{% block extra_head %}
+<style>
+@media print {
+    /* Garantiza que la estructura de 2 columnas se mantenga idéntica a la pantalla */
+    .ride-row {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 12px !important;
+    }
+    .ride-col-6 {
+        flex: 0 0 50% !important;
+        width: 50% !important;
+        max-width: 50% !important;
+    }
+    .ride-col-7 {
+        flex: 0 0 58% !important;
+        width: 58% !important;
+        max-width: 58% !important;
+    }
+    .ride-col-5 {
+        flex: 0 0 42% !important;
+        width: 42% !important;
+        max-width: 42% !important;
+    }
+    .ride-header-box {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Barra de Acciones Superior (Oculta al imprimir) -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 no-print gap-2">
+    <div>
+        <a href="{% url 'factura_lista' %}" class="btn btn-outline-secondary btn-sm me-2">
+            <i class="bi bi-arrow-left"></i> Volver a Facturas
+        </a>
+        <span class="fs-5 fw-bold text-dark">Comprobante RIDE #{{ factura.numero_factura }}</span>
+        {% if factura.estado == 'EMITIDA' %}
+            <span class="badge bg-success ms-2"><i class="bi bi-check-circle me-1"></i>Válida / Emitida</span>
+        {% else %}
+            <span class="badge bg-danger ms-2"><i class="bi bi-x-circle me-1"></i>ANULADA</span>
+        {% endif %}
+    </div>
+
+    <div class="d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-primary shadow-sm">
+            <i class="bi bi-printer me-1"></i> Imprimir / Guardar PDF
+        </button>
+
+        {% if factura.estado == 'EMITIDA' %}
+        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalAnular">
+            <i class="bi bi-x-circle me-1"></i> Anular Factura
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+{% if factura.estado == 'ANULADA' %}
+<div class="alert alert-danger no-print mb-4 shadow-sm" role="alert">
+    <i class="bi bi-exclamation-octagon-fill me-2 fs-5"></i>
+    <strong>Factura Anulada:</strong> Las existencias de los productos incluidos en esta factura fueron reingresadas automáticamente al inventario.
+</div>
+{% endif %}
+
+<!-- Formato RIDE SRI Ecuador -->
+<div class="ride-container mb-5">
+    <!-- Encabezado en 2 Bloques -->
+    <div class="row g-2 g-md-3 mb-2 mb-md-3 ride-row">
+        <!-- Bloque Emisor -->
+        <div class="col-6 ride-col-6">
+            <div class="ride-header-box h-100">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="flag-badge"></span>
+                    <h5 class="fw-bold mb-0 text-dark">{{ emisor.razon_social }}</h5>
+                </div>
+                <div class="text-muted fw-semibold mb-2">{{ emisor.nombre_comercial }}</div>
+
+                <div class="small text-secondary mb-2">
+                    <strong>Dirección Matriz:</strong> {{ emisor.direccion_matriz }}
+                </div>
+
+                <div class="small text-secondary mb-1">
+                    <strong>Obligado a llevar contabilidad:</strong> {% if emisor.obligado_contabilidad %}SÍ{% else %}NO{% endif %}
+                </div>
+                {% if emisor.es_contribuyente_rimpe %}
+                <div class="small text-primary fw-semibold">
+                    <i class="bi bi-check2"></i> Contribuyente Régimen RIMPE
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Bloque SRI / Factura -->
+        <div class="col-6 ride-col-6">
+            <div class="ride-header-box h-100 font-monospace">
+                <div class="small fw-bold text-muted">R.U.C.: <span class="text-dark fs-6">{{ emisor.ruc }}</span></div>
+                <h5 class="fw-bold text-primary my-1">FACTURA</h5>
+                <div class="small mb-2">
+                    <strong>No.</strong> <span class="fs-6 fw-bold text-dark">{{ factura.numero_factura }}</span>
+                </div>
+
+                <div class="small text-muted mb-1">
+                    <strong>NÚMERO DE AUTORIZACIÓN:</strong>
+                </div>
+                <div class="ride-clave small text-dark mb-2">
+                    {{ factura.fecha_emision|date:"dmY" }}01{{ emisor.ruc }}1{{ emisor.establecimiento }}{{ emisor.punto_emision }}{{ factura.secuencial|stringformat:"09d" }}123456781
+                </div>
+
+                <div class="small text-muted mb-1">
+                    <strong>FECHA Y HORA DE AUTORIZACIÓN:</strong> {{ factura.fecha_emision|date:"d/m/Y H:i:s" }}
+                </div>
+                <div class="small text-muted mb-1">
+                    <strong>AMBIENTE:</strong> PRODUCCIÓN &bull; <strong>EMISIÓN:</strong> NORMAL
+                </div>
+
+                <div class="small text-muted mt-2">
+                    <strong>CLAVE DE ACCESO:</strong>
+                </div>
+                <div class="ride-clave small text-dark">
+                    {{ factura.fecha_emision|date:"dmY" }}01{{ emisor.ruc }}1{{ emisor.establecimiento }}{{ emisor.punto_emision }}{{ factura.secuencial|stringformat:"09d" }}123456781
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bloque Datos del Cliente -->
+    <div class="ride-header-box mb-3">
+        <div class="row g-2 small">
+            <div class="col-8">
+                <strong>Razón Social / Nombres y Apellidos:</strong> {{ factura.cliente.nombres }}
+            </div>
+            <div class="col-4">
+                <strong>Identificación:</strong> <span class="font-monospace fw-bold">{{ factura.cliente.identificacion }}</span>
+            </div>
+            <div class="col-6">
+                <strong>Fecha Emisión:</strong> {{ factura.fecha_emision|date:"d/m/Y" }}
+            </div>
+            <div class="col-6">
+                <strong>Guía de Remisión:</strong> -
+            </div>
+            <div class="col-12">
+                <strong>Dirección:</strong> {{ factura.cliente.direccion|default:"Ecuador" }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Ítems / Productos -->
+    <div class="table-responsive mb-3">
+        <table class="table table-bordered table-sm align-middle mb-0">
+            <thead class="table-light text-center small">
+                <tr>
+                    <th style="width: 15%;">Cod. Principal</th>
+                    <th style="width: 8%;">Cant.</th>
+                    <th style="width: 42%;">Descripción</th>
+                    <th style="width: 13%;">Precio Unitario</th>
+                    <th style="width: 10%;">Descuento</th>
+                    <th style="width: 12%;">Precio Total</th>
+                </tr>
+            </thead>
+            <tbody class="small">
+                {% for d in detalles %}
+                <tr>
+                    <td class="font-monospace text-center">{{ d.codigo_producto }}</td>
+                    <td class="text-center fw-semibold">{{ d.cantidad|floatformat:0 }}</td>
+                    <td>
+                        <div class="fw-semibold">{{ d.nombre_producto }}</div>
+                        <small class="text-muted">Tarifa IVA: {{ d.tarifa_iva|floatformat:0 }}%</small>
+                    </td>
+                    <td class="text-end font-monospace">${{ d.precio_unitario|floatformat:2 }}</td>
+                    <td class="text-end font-monospace">${{ d.descuento|floatformat:2 }}</td>
+                    <td class="text-end font-monospace fw-bold">${{ d.subtotal|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bloque Inferior: Información Adicional y Resumen de Totales SRI -->
+    <div class="row g-2 g-md-3 ride-row">
+        <!-- Izquierda: Información Adicional y Forma de Pago -->
+        <div class="col-7 ride-col-7">
+            <div class="ride-header-box mb-3 small">
+                <h6 class="fw-bold mb-2">Información Adicional</h6>
+                <div class="mb-1"><strong>Email:</strong> {{ factura.cliente.email|default:"consumidor@final.ec" }}</div>
+                <div class="mb-1"><strong>Teléfono:</strong> {{ factura.cliente.telefono|default:"-" }}</div>
+                {% if factura.observaciones %}
+                    <div class="mt-2 text-muted"><strong>Observaciones:</strong><br>{{ factura.observaciones|linebreaksbr }}</div>
+                {% endif %}
+            </div>
+
+            <div class="ride-header-box small">
+                <h6 class="fw-bold mb-2">Forma de Pago (SRI)</h6>
+                <table class="table table-bordered table-sm mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Descripción</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ factura.get_forma_pago_display }}</td>
+                            <td class="text-end font-monospace fw-bold">${{ factura.total|floatformat:2 }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Derecha: Cuadro de Impuestos y Totales -->
+        <div class="col-5 ride-col-5">
+            <table class="table table-bordered table-sm small mb-0">
+                <tbody>
+                    <tr>
+                        <td class="fw-semibold">SUBTOTAL 15%</td>
+                        <td class="text-end font-monospace">${{ factura.subtotal_15|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold">SUBTOTAL 0%</td>
+                        <td class="text-end font-monospace">${{ factura.subtotal_0|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold">SUBTOTAL NO OBJETO DE IVA</td>
+                        <td class="text-end font-monospace">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold">SUBTOTAL EXENTO DE IVA</td>
+                        <td class="text-end font-monospace">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold">SUBTOTAL SIN IMPUESTOS</td>
+                        <td class="text-end font-monospace fw-bold">${{ factura.subtotal_sin_impuestos|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold">TOTAL DESCUENTO</td>
+                        <td class="text-end font-monospace">${{ factura.descuento_total|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold text-primary">IVA 15%</td>
+                        <td class="text-end font-monospace fw-bold text-primary">${{ factura.iva_15|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="table-light">
+                        <td class="fw-bold fs-6">VALOR TOTAL</td>
+                        <td class="text-end font-monospace fw-bold fs-6 text-success">${{ factura.total|floatformat:2 }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Anulación de Factura (Reposición automática de inventario) -->
+{% if factura.estado == 'EMITIDA' %}
+<div class="modal fade no-print" id="modalAnular" tabindex="-1" aria-labelledby="modalAnularLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'factura_anular' factura.pk %}">
+                {% csrf_token %}
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold" id="modalAnularLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Anular Factura #{{ factura.numero_factura }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas anular esta factura emitida a <strong>{{ factura.cliente.nombres }}</strong> por un total de <strong>${{ factura.total }}</strong>?</p>
+
+                    <div class="alert alert-warning small">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>
+                        <strong>Impacto en Inventario:</strong> Al anular la factura, las unidades de todos los productos incluidos serán <strong>devueltas automáticamente al stock disponible</strong> en inventario.
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Motivo de la anulación:</label>
+                        <input type="text" name="motivo" class="form-control" required placeholder="Ej. Error en cantidad / Devolución del cliente">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger fw-semibold">
+                        <i class="bi bi-x-circle me-1"></i> Confirmar Anulación y Reponer Stock
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

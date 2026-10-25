@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} | Facturador Ecuador{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex align-items-center mb-3">
+            <a href="{% url 'cliente_lista' %}" class="btn btn-outline-secondary btn-sm me-3">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+            <h3 class="fw-bold mb-0">{{ titulo }}</h3>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label fw-semibold">Tipo de Identificación <span class="text-danger">*</span></label>
+                            {{ form.tipo_identificacion }}
+                            {% if form.tipo_identificacion.errors %}
+                                <div class="text-danger small mt-1">{{ form.tipo_identificacion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-7">
+                            <label class="form-label fw-semibold">Número de Identificación <span class="text-danger">*</span></label>
+                            {{ form.identificacion }}
+                            <div class="form-text small">Cédula: 10 dígitos &bull; RUC: 13 dígitos &bull; Consumidor Final: 9999999999999</div>
+                            {% if form.identificacion.errors %}
+                                <div class="text-danger small mt-1">{{ form.identificacion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Nombres y Apellidos o Razón Social <span class="text-danger">*</span></label>
+                            {{ form.nombres }}
+                            {% if form.nombres.errors %}
+                                <div class="text-danger small mt-1">{{ form.nombres.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Correo Electrónico (para RIDE/Factura)</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Teléfono o Celular</label>
+                            {{ form.telefono }}
+                            {% if form.telefono.errors %}
+                                <div class="text-danger small mt-1">{{ form.telefono.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Dirección</label>
+                            {{ form.direccion }}
+                            {% if form.direccion.errors %}
+                                <div class="text-danger small mt-1">{{ form.direccion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <a href="{% url 'cliente_lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="bi bi-check-lg me-1"></i> Guardar Cliente
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

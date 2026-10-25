@@ -1,0 +1,348 @@
+/* ========================================================
+   Facturador Ecuador - Estilos Personalizados Bootstrap 5
+   ======================================================== */
+
+:root {
+    --primary-color: #0d6efd;
+    --primary-dark: #0a58ca;
+    --accent-color: #0dcaf0;
+    --bg-light: #f8f9fa;
+    --sidebar-bg: #1e293b;
+    --card-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --card-shadow-hover: 0 0.5rem 1rem rgba(0, 0, 0, 0.12);
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: #f4f6f9;
+    color: #2b3035;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navbar */
+.navbar-brand-custom {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.flag-badge {
+    background: linear-gradient(180deg, #ffdd00 0%, #ffdd00 50%, #034ea2 50%, #034ea2 75%, #ed1c24 75%, #ed1c24 100%);
+    width: 20px;
+    height: 14px;
+    display: inline-block;
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: var(--card-shadow-hover);
+}
+
+.stat-card {
+    border-left: 4px solid var(--primary-color);
+}
+
+.stat-card.stat-success {
+    border-left-color: #198754;
+}
+
+.stat-card.stat-warning {
+    border-left-color: #ffc107;
+}
+
+.stat-card.stat-danger {
+    border-left-color: #dc3545;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* Tables */
+.table thead th {
+    background-color: #f8fafc;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Badges */
+.badge-stock-ok {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    font-weight: 600;
+}
+
+.badge-stock-low {
+    background-color: #fff3cd;
+    color: #664d03;
+    font-weight: 600;
+}
+
+.badge-stock-out {
+    background-color: #f8d7da;
+    color: #842029;
+    font-weight: 600;
+}
+
+/* RIDE Factura Formato SRI */
+.ride-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+}
+
+.ride-header-box {
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 1.25rem;
+    background-color: #ffffff;
+}
+
+.ride-barcode {
+    font-family: 'Libre Barcode 39', monospace, monospace;
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+    line-height: 1;
+}
+
+.ride-clave {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    word-break: break-all;
+}
+
+/* ========================================================
+   Estilos de Impresión Optimizados (Formato Oficial RIDE SRI)
+   ======================================================== */
+@media print {
+    /* Forzar impresión exacta de colores y fondos */
+    *, *::before, *::after {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    @page {
+        size: A4 portrait;
+        margin: 8mm 10mm;
+    }
+
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 8.5pt !important;
+        line-height: 1.25 !important;
+        display: block !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Ocultar elementos irrelevantes para el comprobante impreso */
+    .no-print,
+    nav,
+    .navbar,
+    footer,
+    .btn,
+    .alert,
+    .modal,
+    .modal-backdrop {
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Contenedor principal sin paddings excesivos */
+    main,
+    .container-fluid,
+    .container {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        display: block !important;
+    }
+
+    .ride-container {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        background: transparent !important;
+    }
+
+    /* PRESERVAR SISTEMA DE COLUMNAS (GRID) EN IMPRESIÓN */
+    .row,
+    .ride-row {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        margin-left: -5px !important;
+        margin-right: -5px !important;
+    }
+
+    .row > *,
+    .ride-row > * {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+
+    .col-6,
+    .col-md-6,
+    .ride-col-6 {
+        flex: 0 0 50% !important;
+        width: 50% !important;
+        max-width: 50% !important;
+    }
+
+    .col-7,
+    .col-md-7,
+    .ride-col-7 {
+        flex: 0 0 58.333333% !important;
+        width: 58.333333% !important;
+        max-width: 58.333333% !important;
+    }
+
+    .col-5,
+    .col-md-5,
+    .ride-col-5 {
+        flex: 0 0 41.666667% !important;
+        width: 41.666667% !important;
+        max-width: 41.666667% !important;
+    }
+
+    .col-8,
+    .col-md-8 {
+        flex: 0 0 66.666667% !important;
+        width: 66.666667% !important;
+        max-width: 66.666667% !important;
+    }
+
+    .col-4,
+    .col-md-4 {
+        flex: 0 0 33.333333% !important;
+        width: 33.333333% !important;
+        max-width: 33.333333% !important;
+    }
+
+    .col-12 {
+        flex: 0 0 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Cajas y Bordes del Comprobante */
+    .ride-header-box {
+        border: 1px solid #1e293b !important;
+        border-radius: 6px !important;
+        padding: 8px 10px !important;
+        background-color: #ffffff !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        margin-bottom: 6px !important;
+    }
+
+    .ride-header-box h5 {
+        font-size: 10.5pt !important;
+        margin-bottom: 4px !important;
+    }
+
+    .ride-header-box h6 {
+        font-size: 9pt !important;
+        margin-bottom: 4px !important;
+    }
+
+    .ride-clave {
+        font-size: 7.2pt !important;
+        letter-spacing: 0.2px !important;
+        word-break: break-all !important;
+        line-height: 1.1 !important;
+    }
+
+    /* Tablas y Renglones */
+    .table-responsive {
+        overflow: visible !important;
+        display: block !important;
+        margin-bottom: 8px !important;
+    }
+
+    .table {
+        width: 100% !important;
+        font-size: 8pt !important;
+        margin-bottom: 6px !important;
+        border-collapse: collapse !important;
+        page-break-inside: auto !important;
+    }
+
+    .table-bordered,
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid #334155 !important;
+    }
+
+    .table th,
+    .table td {
+        padding: 3px 5px !important;
+        color: #000000 !important;
+        vertical-align: middle !important;
+    }
+
+    .table thead th {
+        background-color: #f1f5f9 !important;
+        font-weight: 700 !important;
+        color: #000000 !important;
+        border-bottom: 1.5px solid #0f172a !important;
+    }
+
+    tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .text-primary,
+    .text-success,
+    .text-danger,
+    .text-muted,
+    .text-secondary {
+        color: #000000 !important;
+    }
+
+    .flag-badge {
+        display: none !important;
+    }
+}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar Sesión | Facturador Ecuador{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 75vh;">
+    <div class="col-md-7 col-lg-5 col-xl-4">
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+            <!-- Encabezado con degradado suave -->
+            <div class="card-header bg-dark text-white text-center py-4 border-0 position-relative">
+                <span class="flag-badge position-absolute top-0 start-50 translate-middle-x mt-2"></span>
+                <div class="mt-2">
+                    <h4 class="fw-bold mb-1">Factura<span class="text-primary">EC</span></h4>
+                    <p class="text-white-50 small mb-0">Sistema de Facturación & Inventario</p>
+                </div>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <h5 class="fw-bold text-center text-dark mb-4">Iniciar Sesión</h5>
+
+                <form method="post" id="formLogin">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">USUARIO</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-secondary"></i></span>
+                            <input type="text" name="username" id="username" class="form-control border-start-0" placeholder="Nombre de usuario" required autofocus>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small text-muted">CONTRASEÑA</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-secondary"></i></span>
+                            <input type="password" name="password" id="password" class="form-control border-start-0" placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm rounded-3">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Entrar al Sistema
+                    </button>
+                </form>
+
+                <!-- Separador -->
+                <div class="position-relative my-4">
+                    <hr class="text-muted">
+                    <span class="position-absolute top-50 start-50 translate-middle bg-white px-2 small text-muted fw-semibold">
+                        ROLES DEL SISTEMA
+                    </span>
+                </div>
+
+                <!-- Botones de Acceso Rápido según el rol solicitado -->
+                <div class="d-flex flex-column gap-2">
+                    <button type="button" class="btn btn-outline-dark btn-sm text-start d-flex align-items-center justify-content-between p-2 rounded-3" onclick="autocompletar('admin', 'admin123')">
+                        <div>
+                            <strong class="d-block text-dark"><i class="bi bi-shield-check text-primary me-1"></i> Administrador</strong>
+                            <small class="text-muted">Acceso total a todo el sistema</small>
+                        </div>
+                        <span class="badge bg-primary-subtle text-primary border">admin</span>
+                    </button>
+
+                    <button type="button" class="btn btn-outline-dark btn-sm text-start d-flex align-items-center justify-content-between p-2 rounded-3" onclick="autocompletar('asesor', 'asesor123')">
+                        <div>
+                            <strong class="d-block text-dark"><i class="bi bi-receipt text-success me-1"></i> Asesor Comercial</strong>
+                            <small class="text-muted">Emisión de facturas y clientes</small>
+                        </div>
+                        <span class="badge bg-success-subtle text-success border">asesor</span>
+                    </button>
+
+                    <button type="button" class="btn btn-outline-dark btn-sm text-start d-flex align-items-center justify-content-between p-2 rounded-3" onclick="autocompletar('bodeguero', 'bodeguero123')">
+                        <div>
+                            <strong class="d-block text-dark"><i class="bi bi-boxes text-warning me-1"></i> Bodeguero</strong>
+                            <small class="text-muted">Gestión de stock, productos y Kardex</small>
+                        </div>
+                        <span class="badge bg-warning-subtle text-warning border">bodeguero</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-footer bg-light text-center py-3 border-0 small text-muted">
+                Seguridad & Control de Roles &bull; Normativa SRI Ecuador
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function autocompletar(user, pass) {
+        document.getElementById('username').value = user;
+        document.getElementById('password').value = pass;
+        document.getElementById('formLogin').submit();
+    }
+</script>
+{% endblock %}

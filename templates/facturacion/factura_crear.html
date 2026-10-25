@@ -1,0 +1,418 @@
+{% extends 'base.html' %}
+
+{% block title %}Emitir Factura | Facturador Ecuador{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-3">
+    <div class="col-md-7">
+        <h2 class="fw-bold mb-1">
+            <i class="bi bi-file-earmark-plus text-primary me-2"></i>Emitir Nueva Factura
+        </h2>
+        <p class="text-muted mb-0">Normativa SRI Ecuador &bull; Reducción automática de inventario en tiempo real.</p>
+    </div>
+    <div class="col-md-5 text-md-end">
+        <span class="badge bg-primary fs-6 px-3 py-2 shadow-sm">
+            Factura Nro: <strong>{{ siguiente_numero }}</strong>
+        </span>
+    </div>
+</div>
+
+<form method="post" id="formFactura" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="items_json" id="items_json" value="[]">
+
+    <div class="row g-4">
+        <!-- Columna Izquierda: Datos del Cliente y Detalle de Productos -->
+        <div class="col-lg-8">
+            <!-- Tarjeta Datos del Cliente -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title fw-bold mb-0 text-dark">
+                        <i class="bi bi-person-bounding-box text-primary me-2"></i> Datos del Cliente
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnConsumidorFinal">
+                            <i class="bi bi-person-check me-1"></i> Consumidor Final
+                        </button>
+                        <a href="{% url 'cliente_crear' %}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-person-plus me-1"></i> Nuevo Cliente
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label class="form-label fw-semibold">Cliente <span class="text-danger">*</span></label>
+                            <select name="cliente_id" id="cliente_id" class="form-select" required>
+                                <option value="">-- Seleccionar Cliente Registrado --</option>
+                                {% for c in clientes %}
+                                    <option value="{{ c.id }}"
+                                            data-identificacion="{{ c.identificacion }}"
+                                            data-email="{{ c.email }}"
+                                            data-direccion="{{ c.direccion }}"
+                                            {% if c.identificacion == '9999999999999' %}selected{% endif %}>
+                                        {{ c.nombres }} ({{ c.get_tipo_identificacion_display }}: {{ c.identificacion }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-5">
+                            <label class="form-label fw-semibold">Forma de Pago (SRI) <span class="text-danger">*</span></label>
+                            <select name="forma_pago" class="form-select">
+                                {% for cod, desc in formas_pago %}
+                                    <option value="{{ cod }}">{{ desc }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Info rápida del cliente seleccionado -->
+                        <div class="col-12" id="infoClienteBox">
+                            <div class="p-2 bg-light rounded border text-muted small d-flex flex-wrap gap-3">
+                                <div><strong class="text-dark">ID:</strong> <span id="lblClienteId">9999999999999</span></div>
+                                <div><strong class="text-dark">Email:</strong> <span id="lblClienteEmail">consumidor@final.ec</span></div>
+                                <div><strong class="text-dark">Dirección:</strong> <span id="lblClienteDir">Ecuador</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta Detalle de Productos e Inventario -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title fw-bold mb-0 text-dark">
+                            <i class="bi bi-cart3 text-primary me-2"></i> Productos a Facturar
+                        </h5>
+                        <small class="text-muted">El stock se deducirá al emitir la factura</small>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnAgregarFila">
+                        <i class="bi bi-plus-circle me-1"></i> Agregar Producto
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0" id="tablaDetalles">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="min-width: 250px;">Producto (Stock Disponible)</th>
+                                    <th style="width: 110px;" class="text-center">Cantidad</th>
+                                    <th style="width: 120px;" class="text-end">Precio (s/IVA)</th>
+                                    <th style="width: 100px;" class="text-center">IVA</th>
+                                    <th style="width: 120px;" class="text-end">Subtotal</th>
+                                    <th style="width: 60px;" class="text-center"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="detallesBody">
+                                <!-- Las filas se agregan dinámicamente con JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mensaje si no hay productos agregados -->
+                    <div id="sinProductosAviso" class="text-center py-5 text-muted">
+                        <i class="bi bi-cart-x fs-1 d-block mb-2 text-secondary"></i>
+                        No has añadido productos a la factura todavía.
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="agregarFilaProducto()">
+                                <i class="bi bi-plus-lg me-1"></i> Añadir Primer Producto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observaciones adicionales -->
+            <div class="card shadow-sm">
+                <div class="card-body p-3">
+                    <label class="form-label fw-semibold">Observaciones / Información Adicional</label>
+                    <textarea name="observaciones" rows="2" class="form-control" placeholder="Ej. Garantía 1 año / Pago 50% anticipo..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Resumen de Totales e Impuestos SRI Ecuador -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-primary sticky-top" style="top: 80px;">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="card-title fw-bold mb-0 d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-calculator me-1"></i> Resumen Tributario</span>
+                        <span class="badge bg-white text-primary">Ecuador</span>
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Subtotal Tarifa 15%:</span>
+                            <span class="font-monospace fw-semibold" id="resumenSubtotal15">$0.00</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Subtotal Tarifa 0%:</span>
+                            <span class="font-monospace fw-semibold" id="resumenSubtotal0">$0.00</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Subtotal sin Impuestos:</span>
+                            <span class="font-monospace fw-semibold" id="resumenSubtotalSinImp">$0.00</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="text-muted">Descuento:</span>
+                            <span class="font-monospace text-muted" id="resumenDescuento">$0.00</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="fw-semibold text-primary">IVA 15%:</span>
+                            <span class="font-monospace fw-bold text-primary" id="resumenIva15">$0.00</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 pt-3 border-top border-2">
+                            <span class="fs-5 fw-bold text-dark">TOTAL A PAGAR:</span>
+                            <span class="fs-4 font-monospace fw-bold text-success" id="resumenTotal">$0.00</span>
+                        </li>
+                    </ul>
+
+                    <div class="alert alert-info py-2 small mb-4">
+                        <i class="bi bi-info-circle-fill me-1"></i>
+                        Al emitir, el sistema verificará el stock y <strong>reducirá automáticamente</strong> las unidades facturadas del inventario.
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-lg w-100 fw-bold shadow" id="btnEmitirFactura" disabled>
+                        <i class="bi bi-check2-circle me-1"></i> Emitir Factura Ahora
+                    </button>
+
+                    <a href="{% url 'factura_lista' %}" class="btn btn-outline-secondary w-100 mt-2">
+                        Cancelar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    // Catálogo de productos disponibles desde Django
+    const PRODUCTOS = [
+        {% for p in productos %}
+        {
+            id: {{ p.id }},
+            codigo: "{{ p.codigo|escapejs }}",
+            nombre: "{{ p.nombre|escapejs }}",
+            precio: parseFloat("{{ p.precio_unitario }}"),
+            tarifa_iva: parseFloat("{{ p.tarifa_iva }}"),
+            stock: parseFloat("{{ p.stock }}")
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    let items = [];
+
+    // Elementos DOM
+    const detallesBody = document.getElementById('detallesBody');
+    const sinProductosAviso = document.getElementById('sinProductosAviso');
+    const btnAgregarFila = document.getElementById('btnAgregarFila');
+    const itemsJsonInput = document.getElementById('items_json');
+    const btnEmitirFactura = document.getElementById('btnEmitirFactura');
+    const formFactura = document.getElementById('formFactura');
+    const selectCliente = document.getElementById('cliente_id');
+    const btnConsumidorFinal = document.getElementById('btnConsumidorFinal');
+
+    // Botón rápido para seleccionar Consumidor Final
+    if (btnConsumidorFinal) {
+        btnConsumidorFinal.addEventListener('click', () => {
+            for (let opt of selectCliente.options) {
+                if (opt.dataset.identificacion === '9999999999999') {
+                    selectCliente.value = opt.value;
+                    actualizarInfoCliente();
+                    break;
+                }
+            }
+        });
+    }
+
+    // Actualizar detalles del cliente seleccionado
+    selectCliente.addEventListener('change', actualizarInfoCliente);
+    function actualizarInfoCliente() {
+        const opt = selectCliente.selectedOptions[0];
+        if (opt && opt.value) {
+            document.getElementById('lblClienteId').textContent = opt.dataset.identificacion || '-';
+            document.getElementById('lblClienteEmail').textContent = opt.dataset.email || '(Sin email)';
+            document.getElementById('lblClienteDir').textContent = opt.dataset.direccion || 'Ecuador';
+            document.getElementById('infoClienteBox').classList.remove('d-none');
+        } else {
+            document.getElementById('infoClienteBox').classList.add('d-none');
+        }
+    }
+    actualizarInfoCliente();
+
+    // Agregar nueva fila de producto
+    btnAgregarFila.addEventListener('click', () => agregarFilaProducto());
+
+    function agregarFilaProducto(productoPreseleccionadoId = null) {
+        const filaId = 'item_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+
+        let optionsHtml = '<option value="">-- Seleccione un producto --</option>';
+        PRODUCTOS.forEach(p => {
+            const stockAgotado = p.stock <= 0;
+            const disabledAttr = stockAgotado ? 'disabled' : '';
+            const stockText = stockAgotado ? '[AGOTADO]' : `[Stock: ${p.stock}]`;
+            optionsHtml += `<option value="${p.id}" ${disabledAttr}>${p.nombre} - $${p.precio.toFixed(2)} ${stockText}</option>`;
+        });
+
+        const tr = document.createElement('tr');
+        tr.id = filaId;
+        tr.innerHTML = `
+            <td>
+                <select class="form-select form-select-sm select-producto" required>
+                    ${optionsHtml}
+                </select>
+                <div class="small text-muted mt-1 stock-info-text"></div>
+            </td>
+            <td>
+                <input type="number" class="form-control form-control-sm text-center input-cantidad" value="1" min="1" step="1" required disabled>
+            </td>
+            <td>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control form-control-sm text-end input-precio" value="0.00" step="0.01" min="0" readonly>
+                </div>
+            </td>
+            <td class="text-center">
+                <span class="badge bg-light text-dark border badge-iva">-%</span>
+            </td>
+            <td class="text-end font-monospace fw-bold col-subtotal">
+                $0.00
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-outline-danger btn-sm p-1 rounded-circle btn-quitar" title="Eliminar fila">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+
+        detallesBody.appendChild(tr);
+        sinProductosAviso.classList.add('d-none');
+
+        const selectProd = tr.querySelector('.select-producto');
+        const inputCant = tr.querySelector('.input-cantidad');
+        const inputPrecio = tr.querySelector('.input-precio');
+        const badgeIva = tr.querySelector('.badge-iva');
+        const colSubtotal = tr.querySelector('.col-subtotal');
+        const stockInfoText = tr.querySelector('.stock-info-text');
+        const btnQuitar = tr.querySelector('.btn-quitar');
+
+        selectProd.addEventListener('change', () => {
+            const prodId = parseInt(selectProd.value);
+            const prod = PRODUCTOS.find(p => p.id === prodId);
+
+            if (prod) {
+                inputCant.disabled = false;
+                inputCant.max = prod.stock;
+                inputPrecio.value = prod.precio.toFixed(2);
+                badgeIva.textContent = prod.tarifa_iva > 0 ? `${prod.tarifa_iva.toFixed(0)}%` : '0%';
+                stockInfoText.innerHTML = `<span class="badge ${prod.stock <= 5 ? 'bg-warning-subtle text-warning' : 'bg-success-subtle text-success'}">Disponible: ${prod.stock}</span>`;
+
+                if (parseFloat(inputCant.value) > prod.stock) {
+                    inputCant.value = Math.max(1, prod.stock);
+                }
+            } else {
+                inputCant.disabled = true;
+                inputPrecio.value = '0.00';
+                badgeIva.textContent = '-%';
+                stockInfoText.innerHTML = '';
+            }
+            recalcularTotales();
+        });
+
+        inputCant.addEventListener('input', () => {
+            const prodId = parseInt(selectProd.value);
+            const prod = PRODUCTOS.find(p => p.id === prodId);
+            if (prod) {
+                let val = parseFloat(inputCant.value);
+                if (val > prod.stock) {
+                    alert(`¡Atención! La cantidad ingresada (${val}) supera el stock disponible en bodega (${prod.stock}) para ${prod.nombre}.`);
+                    inputCant.value = prod.stock;
+                } else if (val < 1 || isNaN(val)) {
+                    inputCant.value = 1;
+                }
+            }
+            recalcularTotales();
+        });
+
+        btnQuitar.addEventListener('click', () => {
+            tr.remove();
+            if (detallesBody.children.length === 0) {
+                sinProductosAviso.classList.remove('d-none');
+            }
+            recalcularTotales();
+        });
+
+        if (productoPreseleccionadoId) {
+            selectProd.value = productoPreseleccionadoId;
+            selectProd.dispatchEvent(new Event('change'));
+        }
+    }
+
+    // Recalcular totales e impuestos en vivo
+    function recalcularTotales() {
+        let subtotal15 = 0;
+        let subtotal0 = 0;
+        let itemsData = [];
+
+        const filas = detallesBody.querySelectorAll('tr');
+
+        filas.forEach(tr => {
+            const selectProd = tr.querySelector('.select-producto');
+            const inputCant = tr.querySelector('.input-cantidad');
+            const inputPrecio = tr.querySelector('.input-precio');
+            const colSubtotal = tr.querySelector('.col-subtotal');
+
+            const prodId = parseInt(selectProd.value);
+            if (!prodId) return;
+
+            const prod = PRODUCTOS.find(p => p.id === prodId);
+            if (!prod) return;
+
+            const cant = parseFloat(inputCant.value) || 0;
+            const precio = parseFloat(inputPrecio.value) || 0;
+            const subtotalLinea = cant * precio;
+
+            colSubtotal.textContent = '$' + subtotalLinea.toFixed(2);
+
+            if (prod.tarifa_iva > 0) {
+                subtotal15 += subtotalLinea;
+            } else {
+                subtotal0 += subtotalLinea;
+            }
+
+            itemsData.push({
+                producto_id: prod.id,
+                cantidad: cant,
+                precio_unitario: precio,
+                descuento: 0.00
+            });
+        });
+
+        const subtotalSinImp = subtotal15 + subtotal0;
+        const iva15 = subtotal15 * 0.15; // 15% IVA Ecuador
+        const total = subtotalSinImp + iva15;
+
+        // Actualizar interfaz
+        document.getElementById('resumenSubtotal15').textContent = '$' + subtotal15.toFixed(2);
+        document.getElementById('resumenSubtotal0').textContent = '$' + subtotal0.toFixed(2);
+        document.getElementById('resumenSubtotalSinImp').textContent = '$' + subtotalSinImp.toFixed(2);
+        document.getElementById('resumenIva15').textContent = '$' + iva15.toFixed(2);
+        document.getElementById('resumenTotal').textContent = '$' + total.toFixed(2);
+
+        // Guardar JSON en input hidden
+        itemsJsonInput.value = JSON.stringify(itemsData);
+
+        // Habilitar / deshabilitar botón de emisión
+        btnEmitirFactura.disabled = (itemsData.length === 0);
+    }
+
+    // Agregar automáticamente una fila inicial si hay productos
+    if (PRODUCTOS.length > 0) {
+        // Encontrar el primer producto con stock
+        const primerConStock = PRODUCTOS.find(p => p.stock > 0);
+        agregarFilaProducto(primerConStock ? primerConStock.id : null);
+    }
+</script>
+{% endblock %}

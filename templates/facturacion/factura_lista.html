@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Facturas Emitidas | Facturador Ecuador{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h2 class="fw-bold mb-1">
+            <i class="bi bi-receipt text-primary me-2"></i>Historial de Facturas
+        </h2>
+        <p class="text-muted mb-0">Comprobantes de venta emitidos bajo esquema de facturación para Ecuador.</p>
+    </div>
+    <a href="{% url 'factura_crear' %}" class="btn btn-primary shadow-sm">
+        <i class="bi bi-file-earmark-plus me-1"></i> Emitir Nueva Factura
+    </a>
+</div>
+
+<!-- Filtros y Búsqueda -->
+<div class="card mb-4">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" value="{{ q }}" class="form-control border-start-0" placeholder="Buscar por número de factura o cliente...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="estado" class="form-select" onchange="this.form.submit()">
+                    <option value="">-- Todos los Estados --</option>
+                    <option value="EMITIDA" {% if estado == 'EMITIDA' %}selected{% endif %}>Solo Emitidas (Válidas)</option>
+                    <option value="ANULADA" {% if estado == 'ANULADA' %}selected{% endif %}>Solo Anuladas</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-dark w-100">Filtrar</button>
+            </div>
+            {% if q or estado %}
+            <div class="col-md-2">
+                <a href="{% url 'factura_lista' %}" class="btn btn-link text-decoration-none">Limpiar filtros</a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de Facturas -->
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Nro. Factura</th>
+                        <th>Fecha y Hora</th>
+                        <th>Cliente</th>
+                        <th>Forma de Pago</th>
+                        <th class="text-end">Subtotal</th>
+                        <th class="text-end">IVA 15%</th>
+                        <th class="text-end">Total USD</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-end" style="width: 140px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fac in facturas %}
+                    <tr {% if fac.estado == 'ANULADA' %}class="table-light text-muted"{% endif %}>
+                        <td>
+                            <a href="{% url 'factura_detalle' fac.pk %}" class="fw-bold font-monospace text-decoration-none text-primary">
+                                {{ fac.numero_factura }}
+                            </a>
+                        </td>
+                        <td class="small">
+                            {{ fac.fecha_emision|date:"d/m/Y H:i" }}
+                        </td>
+                        <td>
+                            <div class="fw-semibold">{{ fac.cliente.nombres }}</div>
+                            <small class="text-muted font-monospace">{{ fac.cliente.identificacion }}</small>
+                        </td>
+                        <td class="small">
+                            {{ fac.get_forma_pago_display|truncatechars:28 }}
+                        </td>
+                        <td class="text-end font-monospace">
+                            ${{ fac.subtotal_sin_impuestos|floatformat:2 }}
+                        </td>
+                        <td class="text-end font-monospace text-primary">
+                            ${{ fac.iva_15|floatformat:2 }}
+                        </td>
+                        <td class="text-end font-monospace fw-bold fs-6">
+                            ${{ fac.total|floatformat:2 }}
+                        </td>
+                        <td class="text-center">
+                            {% if fac.estado == 'EMITIDA' %}
+                                <span class="badge bg-success-subtle text-success px-2 py-1">
+                                    <i class="bi bi-check-circle me-1"></i> Emitida
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger-subtle text-danger px-2 py-1">
+                                    <i class="bi bi-x-circle me-1"></i> Anulada
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'factura_detalle' fac.pk %}" class="btn btn-outline-primary" title="Ver / Imprimir Factura RIDE">
+                                    <i class="bi bi-eye"></i> RIDE
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="bi bi-receipt-cutoff fs-1 d-block mb-2 text-secondary"></i>
+                            No se encontraron facturas con los criterios seleccionados.
+                            <div class="mt-3">
+                                <a href="{% url 'factura_crear' %}" class="btn btn-primary btn-sm">Emitir Factura</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

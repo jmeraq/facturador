@@ -1,0 +1,19 @@
+[project]
+name = "facturador"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Junior Mera", email = "junior.mera@latam.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "django>=6.1.2",
+]
+
+[project.scripts]
+facturador = "facturador:main"
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14.0"]
+build-backend = "uv_build"
