@@ -38,6 +38,18 @@ Sistema web de facturación electrónica y gestión de inventario adaptado a la 
 
 ---
 
+## 📚 Documentación de Ingeniería de Software (Carpeta `doc/`)
+
+Este repositorio incluye una suite completa de especificaciones pedagógicas en la carpeta [`doc/`](file:///Users/junior.mera@latam.com/Personal/facturador/doc/), diseñada para enseñar a los estudiantes cómo formular requerimientos formales y cómo estos sirven de contexto esencial para la Inteligencia Artificial:
+
+1. **[doc/objetivos.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/objetivos.md)**: Objetivo general y 3 objetivos específicos (SMART).
+2. **[doc/requisitos.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/requisitos.md)**: Requisitos Funcionales (RF-01 al RF-19) y No Funcionales (RNF-01 al RNF-08).
+3. **[doc/casos_de_uso.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/casos_de_uso.md)**: Especificación formal de 9 Casos de Uso con diagramas de interacción.
+4. **[doc/arquitectura_y_modelo_datos.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/arquitectura_y_modelo_datos.md)**: Patrón MVC, capa de servicios, modelo relacional ER y secuencia ACID.
+5. **[doc/guia_contexto_para_ia.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/guia_contexto_para_ia.md)**: Guía didáctica sobre cómo la especificación previa evita alucinaciones y guía a la IA generativa.
+
+---
+
 ## Usuarios y Credenciales de Prueba
 
 El comando `uv run python manage.py poblar_datos` crea los siguientes usuarios listos para usar:
