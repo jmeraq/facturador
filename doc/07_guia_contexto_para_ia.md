@@ -53,10 +53,12 @@ Cuando los documentos de la carpeta `doc/` existen, dejan de ser simple "burocra
 ```mermaid
 graph LR
     subgraph "Documentación (Especificación Humana)"
-        D1["doc/objetivos.md"]
-        D2["doc/requisitos.md"]
-        D3["doc/casos_de_uso.md"]
-        D4["doc/arquitectura_y_modelo_datos.md"]
+        D1["01_objetivos.md"]
+        D2["02_requisitos.md"]
+        D3["03_casos_de_uso.md"]
+        D4["04_stack_tecnologico.md"]
+        D5["05_arquitectura_y_modelo_datos.md"]
+        D6["06_diseno_base_de_datos.md"]
     end
 
     subgraph "Motor de IA (LLM / Antigravity)"
@@ -73,7 +75,9 @@ graph LR
     D1 -->|Delimita el Alcance y Evita Desvíos| IA
     D2 -->|Define Restricciones y Fórmulas| IA
     D3 -->|Guía el Algoritmo Paso a Paso| IA
-    D4 -->|Fija Modelos y Relaciones| IA
+    D4 -->|Fija Herramientas y Librerías| IA
+    D5 -->|Define Patrones y Servicios| IA
+    D6 -->|Fija Modelos y Relaciones BD| IA
 
     IA --> R1
     IA --> R2
@@ -81,10 +85,11 @@ graph LR
     IA --> R4
 ```
 
-1. **`objetivos.md` delimita el alcance**: Le impide a la IA inventar módulos innecesarios (como pasarelas de pago con Stripe o criptomonedas) y la enfoca en el ecosistema ecuatoriano.
-2. **`requisitos.md` fija las reglas no negociables**: La obliga a usar `Decimal`, `ROUND_HALF_UP`, Módulo 10 para cédulas y RBAC estricto.
-3. **`casos_de_uso.md` le da el pseudocódigo paso a paso**: Le dice exactamente qué validar primero, qué bloquear en la base de datos y cómo gestionar las excepciones.
-4. **`arquitectura_y_modelo_datos.md` le da la estructura relacional**: Impide que invente nombres de tablas redundantes o relaciones circulares.
+1. **`01_objetivos.md` delimita el alcance**: Le impide a la IA inventar módulos innecesarios (como pasarelas de pago con Stripe o criptomonedas) y la enfoca en el ecosistema ecuatoriano.
+2. **`02_requisitos.md` fija las reglas no negociables**: La obliga a usar `Decimal`, `ROUND_HALF_UP`, Módulo 10 para cédulas y RBAC estricto.
+3. **`03_casos_de_uso.md` le da el pseudocódigo paso a paso**: Le dice exactamente qué validar primero, qué bloquear en la base de datos y cómo gestionar las excepciones.
+4. **`04_stack_tecnologico.md` fija las librerías**: Evita que mezcle dependencias incompatibles o agregue frameworks pesados innecesarios.
+5. **`05_arquitectura_y_modelo_datos.md` y `06_diseno_base_de_datos.md` le dan la estructura relacional**: Impiden que invente nombres de tablas redundantes o relaciones circulares.
 
 ---
 
@@ -135,8 +140,8 @@ def guardar_factura(request):
 ```
 PROMPT DEL ALUMNO PROFESIONAL:
 "Actúa como un desarrollador senior de Django. Implementa la lógica de emisión de facturas
-siguiendo estrictamente la especificación del Caso de Uso CU-05 (doc/casos_de_uso.md),
-los requisitos funcionales RF-12 a RF-15 (doc/requisitos.md) y el requisito no funcional RNF-02.
+siguiendo estrictamente la especificación del Caso de Uso CU-05 (doc/03_casos_de_uso.md),
+los requisitos funcionales RF-12 a RF-15 (doc/02_requisitos.md) y el requisito no funcional RNF-02.
 
 Asegúrate de:
 1. Usar la capa de servicios FacturacionService en services.py con @transaction.atomic.

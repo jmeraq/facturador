@@ -42,12 +42,14 @@ Sistema web de facturación electrónica y gestión de inventario adaptado a la 
 
 Este repositorio incluye una suite completa de especificaciones pedagógicas en la carpeta [`doc/`](file:///Users/junior.mera@latam.com/Personal/facturador/doc/), diseñada para enseñar a los estudiantes cómo formular requerimientos formales y cómo estos sirven de contexto esencial para la Inteligencia Artificial:
 
-1. **[doc/objetivos.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/objetivos.md)**: Objetivo general y 3 objetivos específicos (SMART).
-2. **[doc/requisitos.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/requisitos.md)**: Requisitos Funcionales (RF-01 al RF-19) y No Funcionales (RNF-01 al RNF-08).
-3. **[doc/casos_de_uso.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/casos_de_uso.md)**: Especificación formal de 9 Casos de Uso con diagramas de interacción.
-4. **[doc/arquitectura_y_modelo_datos.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/arquitectura_y_modelo_datos.md)**: Patrón MVC, capa de servicios, modelo relacional ER y secuencia ACID.
-5. **[doc/stack_tecnologico.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/stack_tecnologico.md)**: Stack tecnológico (Python 3.12, Django 6, SQLite, Bootstrap 5, JS Vanilla, `uv`).
-6. **[doc/guia_contexto_para_ia.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/guia_contexto_para_ia.md)**: Guía didáctica sobre cómo la especificación previa evita alucinaciones y guía a la IA generativa.
+1. **[01_objetivos.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/01_objetivos.md)**: Objetivo general y 3 objetivos específicos (SMART).
+2. **[02_requisitos.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/02_requisitos.md)**: Requisitos Funcionales (RF-01 al RF-19) y No Funcionales (RNF-01 al RNF-08).
+3. **[03_casos_de_uso.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/03_casos_de_uso.md)**: Especificación formal de 9 Casos de Uso con diagramas de interacción.
+4. **[04_stack_tecnologico.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/04_stack_tecnologico.md)**: Stack tecnológico (Python 3.12, Django 6, SQLite, Bootstrap 5, JS Vanilla, `uv`).
+5. **[05_arquitectura_y_modelo_datos.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/05_arquitectura_y_modelo_datos.md)**: Patrón MVC, capa de servicios, modelo relacional ER y secuencia ACID.
+6. **[06_diseno_base_de_datos.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/06_diseno_base_de_datos.md)**: Diseño de base de datos (DER detallado, diccionario de datos, snapshotting, DDL SQL).
+7. **[07_guia_contexto_para_ia.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/07_guia_contexto_para_ia.md)**: Guía didáctica sobre cómo la especificación previa evita alucinaciones y guía a la IA generativa.
+8. **[08_plan_de_implementacion_y_pruebas.md](file:///Users/junior.mera@latam.com/Personal/facturador/doc/08_plan_de_implementacion_y_pruebas.md)**: Hoja de ruta en 7 fases, árbol de archivos, datos de prueba QA y Meta-Prompt para IA.
 
 ---
 
